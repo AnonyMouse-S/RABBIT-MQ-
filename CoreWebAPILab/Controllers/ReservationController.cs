@@ -46,6 +46,7 @@ namespace CoreWebAPILab.Controllers
         public Reservations Put(int id, [FromBody] Reservations res)
         {
             Reservations reservation = new Reservations();
+            reservation.Id = id;
             reservation.Name = res.Name;
             reservation.StartLocation = res.StartLocation;
             reservation.EndLocation = res.EndLocation;

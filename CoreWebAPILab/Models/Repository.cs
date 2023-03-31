@@ -2,52 +2,49 @@
 {
     public class Repository : IRepository
     {
-        private Dictionary<int, Reservations> items;
+        private ReservationContext context;
 
-        public Repository()
+        public Repository(ReservationContext reservationContext)
         {
-            this.items = new Dictionary<int, Reservations>();
-
-            List<Reservations> lstReservation = new List<Reservations>();
-            lstReservation.Add(new Reservations { Id = 1, Name = "Kirti", StartLocation = "Mumbai", EndLocation = "Pune" });
-            lstReservation.Add(new Reservations { Id = 2, Name = "Kirti", StartLocation = "Pune", EndLocation = "Mumbai" });
-
-            foreach (var r in lstReservation)
-            {
-                AddReservation(r);
-            }
+            this.context = reservationContext;
         }
 
         public Reservations AddReservation(Reservations reservation)
         {
-            if(reservation.Id == 0)
-            {
-                int key = items.Count;
-                while (items.ContainsKey(key)) { key++; };
-                reservation.Id = key;
-            }
-            items[reservation.Id] = reservation;
+            context.Reservations.Add(reservation);
+            context.SaveChanges();
+
             return reservation;
         }
 
         public bool DeleteReservation(int id)
         {
-            return items.Remove(id);
+            Reservations? reservations = context.Reservations.Where(x => x.Id == id).FirstOrDefault();
+            if (reservations != null)
+            {
+                context.Remove(reservations);
+                context.SaveChanges();
+                return true;
+            }
+            return false;
         }
 
         public Reservations? GetReservation(int id)
         {
-            return items.ContainsKey(id) ? items[id] : null;
+            Reservations? reservations = context.Reservations.Where(x => x.Id == id).FirstOrDefault();
+            return reservations;
         }
 
         public IEnumerable<Reservations> GetReservations()
         {
-            return items.Values;
+            return context.Reservations.ToList();
         }
 
         public Reservations UpdateReservation(Reservations reservation)
-        {
-            return AddReservation(reservation);
+        {            
+            context.Reservations.Update(reservation);
+            context.SaveChanges();
+            return reservation;
         }
     }
 }

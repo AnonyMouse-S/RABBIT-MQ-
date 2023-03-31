@@ -4,7 +4,7 @@ namespace CoreWebAPILab.Models
 {
     public class ReservationContext: DbContext
     {
-        public ReservationContext()
+        public ReservationContext(DbContextOptions<ReservationContext> options):base(options)
         {
 
         }
