@@ -1,4 +1,5 @@
 ﻿using CoreWebAPILab.Models;
+using CoreWebAPILab.RabbitMQ;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -10,9 +11,12 @@ namespace CoreWebAPILab.Controllers
     public class ReservationController : ControllerBase
     {
         private IRepository repository;
-        public ReservationController(IRepository repository)
+        private IRabitMQProducer rabitMQProducer;
+
+        public ReservationController(IRepository repository, IRabitMQProducer rabitMQProducer)
         {
             this.repository = repository;
+            this.rabitMQProducer = rabitMQProducer;
         }
 
         // GET: api/<ReservationController>
@@ -33,25 +37,20 @@ namespace CoreWebAPILab.Controllers
         [HttpPost]
         public Reservations Post([FromBody] Reservations res)
         {
-            Reservations reservation = new Reservations();
-            reservation.Name = res.Name;
-            reservation.StartLocation = res.StartLocation;
-            reservation.EndLocation = res.EndLocation;
+            Reservations reservation = repository.AddReservation(res);
 
-            return repository.AddReservation(reservation);
+            //send the inserted product data to the queue and consumer will lisen this data from queue
+            rabitMQProducer.SendMessage(reservation);
+
+            return reservation;
         }
 
         // PUT api/<ReservationController>/5
         [HttpPut("{id}")]
         public Reservations Put(int id, [FromBody] Reservations res)
         {
-            Reservations reservation = new Reservations();
-            reservation.Id = id;
-            reservation.Name = res.Name;
-            reservation.StartLocation = res.StartLocation;
-            reservation.EndLocation = res.EndLocation;
-
-            return repository.UpdateReservation(reservation);
+            res.Id = id;
+            return repository.UpdateReservation(res);
         }
 
         // DELETE api/<ReservationController>/5

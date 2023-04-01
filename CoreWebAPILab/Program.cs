@@ -1,4 +1,5 @@
 using CoreWebAPILab.Models;
+using CoreWebAPILab.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient<IRepository, Repository>();
+
+builder.Services.AddScoped<IRabitMQProducer, RabitMQProducer>();
 
 builder.Services.AddDbContext<ReservationContext>(options =>
 {
